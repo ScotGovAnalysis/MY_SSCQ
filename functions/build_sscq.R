@@ -61,8 +61,12 @@ build_sscq <- function(year, weight_var, varlist, sscq_data) {
   # Add proper full year, rename urban rural, and select required columns
   base <- base %>%
     mutate(year = as.integer(year))  %>%
-    rename(UrbRurCode = UrbRur20Code) %>%
-    select(SSCQid, LA, UrbRurCode, SIMD20Q, all_of(varlist), !!sym(weight_var), year)
+    rename_with(
+      ~ case_when(
+        . == "UrbRur13Code" ~ "UrbRurCode",
+        . == "UrbRur20Code" ~ "UrbRurCode",
+        TRUE ~ . )) %>%
+    select(SSCQid, LA, UrbRurCode, starts_with('SIMD'), all_of(varlist), !!sym(weight_var), year)
   
   # Merge SSCQ & XREF to obtain cluster + DZ11 code AND merge dz11 geography lookup
   # Filter out missing weight rows
