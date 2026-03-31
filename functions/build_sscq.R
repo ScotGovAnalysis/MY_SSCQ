@@ -57,6 +57,7 @@ build_sscq <- function(year, weight_var, varlist, sscq_data) {
   # Retrieve datasets from the loaded list
   base <- sscq_data[[paste0("sscq_", year)]]
   xref <- sscq_data[[paste0("xref_", year)]]
+  geo <- sscq_data[[paste0("geo_", year)]]
   
   # Add proper full year, rename urban rural, and select required columns
   base <- base %>%
@@ -72,7 +73,7 @@ build_sscq <- function(year, weight_var, varlist, sscq_data) {
   # Filter out missing weight rows
   df <- base %>%
     left_join(xref %>% select(SSCQid, datazone, cluster), by = "SSCQid") %>%
-    left_join(sscq_data$geo_dz11, by = "datazone") %>%
+    left_join(geo, by = "datazone") %>%
     filter(!!sym(weight_var) > 0)
     
   return(df)
