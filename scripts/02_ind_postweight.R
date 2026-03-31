@@ -10,39 +10,50 @@ source(here::here("scripts", "00_setup.R"))
 message("Execute ind postweight script")
 
 # build SSCQ data
-sscqprev1_ind <- build_sscq(prev1_year, "pooled_ind_wt_sc", varlist_ind, sscq_data) %>%
-  recode_birthcountry
-sscqcurrent_ind <- build_sscq(current_year, "pooled_ind_wt_sc", varlist_ind, sscq_data) %>%
-  recode_birthcountry
+sscq_ind_list <- lapply(years, function(y) build_sscq(y, 
+                                                     weight_var = "pooled_ind_wt_sc", 
+                                                     varlist = varlist_ind, 
+                                                     sscq_data))
+names(sscq_ind_list) <- years
+
+# Add message to inform user about progress
+message("Calculate design weight for ind responses")
 
 # calculate design weight
-deff_prev1_ind <- compute_deffs(sscqprev1_ind, varlist_ind, "pooled_ind_wt_sc")
-deff_current_ind <- compute_deffs(sscqcurrent_ind, varlist_ind, "pooled_ind_wt_sc")
+deff_ind_list <- lapply(seq_along(years), function(i) {
+  compute_deffs(sscq_ind_list[[i]] %>% recode_birthcountry(), 
+                varlist = varlist_ind, 
+                weight_var = "pooled_ind_wt_sc")
+})
+names(deff_ind_list) <- years
 
-# get sample sizes
-nprev1 <- nrow(sscqprev1_ind %>% filter(pooled_ind_wt_sc > 0))
-ncur <- nrow(sscqcurrent_ind %>% filter(pooled_ind_wt_sc > 0))
-ntotal_ind <- nprev1+ncur
+
+# get total sample size
+ntotal_ind <- sum(sapply(sscq_ind_list, function(d) nrow(d)))
 
 # Effective n
-eff_prev1 <- janitor::round_half_up(sum(deff_prev1_ind$n[1] / mean(deff_prev1_ind$median_deff)))
-eff_current <- janitor::round_half_up(sum(deff_current_ind$n[1] / mean(deff_current_ind$median_deff)))
-eff_total = eff_prev1 + eff_current
+n_eff <- sapply(deff_ind_list, function(d) round_half_up(sum(d$n[1] / mean(d$median_deff))))
+y_factors <- n_eff / sum(n_eff)
+names(y_factors) <- years
 
-# proportion of each year
-y1fact <- eff_prev1 / (eff_prev1 + eff_current)
-y2fact <- eff_current / (eff_prev1 + eff_current)
+# Add message to inform user about progress
+message("Calibrate ind weights")
 
 # calibrate weights
 ind_weights <- calibrate_weights(
-  df1 = sscqprev1_ind,
-  df2 = sscqcurrent_ind,
-  weight_var = "pooled_ind_wt_sc",
+  sscq_list      = sscq_ind_list,
+  weight_var     = "pooled_ind_wt_sc",
   preweight_name = "ind_preweight1_sc",
-  y1 = y1fact,
-  y2 = y2fact,
-  nT = ntotal_ind
+  y_factors      = y_factors,
+  nT             = ntotal_ind
 )
 
+# Add message to inform user about progress
+message("Export ind weights")
+
 # export
-save(ind_weights, file = paste0(here('output'), "/calibrated_individual.RData"))
+write.csv(ind_weights, 
+          paste0(here('output'), "/ind_", 
+                 year_suffix,
+                 "_weights.csv"), 
+          row.names = FALSE)

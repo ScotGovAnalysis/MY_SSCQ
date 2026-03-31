@@ -42,5 +42,7 @@ walk(folders,
      ~ if(!file.exists(.x)) dir.create(.x, recursive = TRUE)
 )
 
+# combine years for file names
 
+year_suffix <- paste0(sprintf("%02d", as.integer(years) %% 100), collapse = "")
   

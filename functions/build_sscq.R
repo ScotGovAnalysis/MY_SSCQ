@@ -53,18 +53,10 @@
 #' @export
 
 build_sscq <- function(year, weight_var, varlist, sscq_data) {
-
-  # Get the NAME of the 'year' argument, not its value
-  # e.g. if user passes build_sscq(prev1_year), we get "prev1_year"
-  year_name <- deparse(substitute(year))
-  
-  # Extract everything before the first underscore
-  # "prev1_year" → "prev1"
-  year_prefix <- sub("_.*$", "", year_name)
   
   # Retrieve datasets from the loaded list
-  base <- sscq_data[[paste0("sscq_", year_prefix)]]
-  xref <- sscq_data[[paste0("xref_", year_prefix)]]
+  base <- sscq_data[[paste0("sscq_", year)]]
+  xref <- sscq_data[[paste0("xref_", year)]]
   
   # Add proper full year, rename urban rural, and select required columns
   base <- base %>%

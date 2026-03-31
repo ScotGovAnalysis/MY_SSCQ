@@ -18,11 +18,8 @@
 #' This is the direct R equivalent of the SAS code:
 #'   `&nT * (preweight0 / sum(preweight0))`
 #'
-#' @param df22
-#'   Tibble containing SSCQ microdata for the first year (e.g., 2022).
-#'
-#' @param df23
-#'   Tibble containing SSCQ microdata for the second year (e.g., 2023).
+#' @param sscq_list 
+#'    List containing all SSCQ data
 #'
 #' @param weight_var
 #'   A string giving the name of the original weight to be calibrated,
@@ -32,13 +29,8 @@
 #'   A string giving the name of the final calibrated weight to be created,
 #'   e.g. `"hh_preweight1_sc"` or `"ind_preweight1_sc"`.
 #'
-#' @param y1
-#'   Numeric year factor representing the share of the *effective sample size*
-#'   for the first year.
-#'
-#' @param y2
-#'   Numeric year factor representing the share of the *effective sample size*
-#'   for the second year.
+#' @param y_factors
+#'    named numeric vector, e.g. c("2022"=0.33,"2023"=0.30,"2024"=0.37
 #'
 #' @param nT
 #'   Numeric total sample size for the pooled period, used to normalise the
@@ -55,30 +47,39 @@
 #' @examples
 #' \dontrun{
 #'   hh_weights <- calibrate_weights(
-#'       df22 = sscq2022_hh,
-#'       df23 = sscq2023_hh,
+#'       sscq_list =   list of yearly SSCQ datasets (already built),
 #'       weight_var = "pooled_hh_wt_sc",
 #'       preweight_name = "hh_preweight1_sc",
-#'       y1 = 0.51,
-#'       y2 = 0.49,
+#'       y_factors = y_factors,
 #'       nT = 39276
 #'   )
 #' }
 #'
 #' @export
 
-calibrate_weights <- function(df1, df2, weight_var, preweight_name, y1, y2, nT) {
+calibrate_weights <- function(sscq_list, weight_var, preweight_name, y_factors, nT) {
   
-  bind_rows(
-    # Pooled multi-year SSCQ datasets must be combined before computing
-    # normalisation. We attach the appropriate year factor to each.
-    df1 %>% mutate(preweight0 = y1 * !!sym(weight_var)),
-    df2 %>% mutate(preweight0 = y2 * !!sym(weight_var))
-  ) %>%
+  
+  # Apply year factor to each dataset
+  cal_list <- lapply(seq_along(sscq_list), function(i) {
+    df <- sscq_list[[i]]
+    yr <- as.character(df$year[1])      # extract year value inside dataset
     
+    df %>%
+      mutate(preweight0 = y_factors[yr] * .data[[weight_var]])
+  })
+  
+
+  # Combine all years into a pooled dataset
+  pooled <- bind_rows(cal_list)
+  
+  # Normalise the pooled weight to sum to nT
+  pooled <- pooled %>%
     mutate(
-      # Normalise so that the pooled weight sums to nT
-      preweight1 = nT * (preweight0 / sum(preweight0))
-    ) %>%
-    rename(!!preweight_name := preweight1)
+      !!preweight_name := nT * (preweight0 / sum(preweight0))
+    )
+  
+  return(pooled)
+  
 }
+

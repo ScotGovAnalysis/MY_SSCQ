@@ -129,8 +129,7 @@ age_standardise <- function(df, geotype, weight_var, sape_df) {
     left_join(joined %>% select(!!sym(geotype), ageG, factor),
               by = c(geotype,"ageG")) %>%
     mutate(!!paste0(sub("_.*$", "", weight_var), 
-                    prev1_year %% 100,
-                    current_year %% 100,
+                    year_suffix,
                     "_", 
                     geotype) := factor * !!sym(weight_var))
 }

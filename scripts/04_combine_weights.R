@@ -39,19 +39,16 @@ simplex_wt <- hh_weights %>%
   #   hh<YY1><YY2>_LA
   #   ind<YY1><YY2>_LA
   #   crim<YY1><YY2>_LA
-  #
-  # prev1_year and current_year come from your config and represent
-  # the two pooled years (e.g., 22 and 23).
   rename(
-    !!paste0("hh", prev1_year, current_year, "_LA")   := hh_preweight1_sc,
-    !!paste0("ind", prev1_year, current_year, "_LA")  := ind_preweight1_sc,
-    !!paste0("crim", prev1_year, current_year, "_LA") := crim_preweight1_sc
+    !!paste0("hh", year_suffix, "_LA")   := hh_preweight1_sc,
+    !!paste0("ind", year_suffix, "_LA")  := ind_preweight1_sc,
+    !!paste0("crim", year_suffix, "_LA") := crim_preweight1_sc
   )
 
 # Store dynamic names for convenience
-w_hh   <- paste0("hh", prev1_year, current_year, "_LA")
-w_ind  <- paste0("ind", prev1_year, current_year, "_LA")
-w_crim <- paste0("crim", prev1_year, current_year, "_LA")
+w_hh   <- paste0("hh", year_suffix, "_LA")
+w_ind  <- paste0("ind", year_suffix, "_LA")
+w_crim <- paste0("crim", year_suffix, "_LA")
 
 
 # Summary of the three main weight variables — basic integrity check
@@ -156,8 +153,8 @@ final_weights <- simplex_wt %>%
 
 message("Export weights")
 
-write.csv(final_weights, paste0(here('output'), "/SSCQ_", prev1_year %% 100,
-                                current_year %% 100, "wts.csv"), 
+write.csv(final_weights, 
+          paste0(here('output'), "/SSCQ_", year_suffix, "wts.csv"), 
           row.names = FALSE)
 
 
