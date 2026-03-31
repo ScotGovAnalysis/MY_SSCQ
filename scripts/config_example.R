@@ -5,8 +5,7 @@ datashare <- filepath
 sasdata <- filepath
 sape_path <- filepath
 
-current_year <- 20XX
-prev1_year <- 20XX
+years <- c(20XX, 20XX, ...)
 
 # ---- Load microdata ----
 
