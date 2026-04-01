@@ -44,5 +44,5 @@ walk(folders,
 
 # combine years for file names
 
-year_suffix <- paste0(as.integer(years[1]) %% 100, as.integer(years[-1]) %% 100)
+year_suffix <- paste0(as.integer(years[1]) %% 100, as.integer(years[length(years)]) %% 100)
   
