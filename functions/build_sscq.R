@@ -72,8 +72,8 @@ build_sscq <- function(year, weight_var, varlist, sscq_data) {
   # Merge SSCQ & XREF to obtain cluster + DZ11 code AND merge dz11 geography lookup
   # Filter out missing weight rows
   df <- base %>%
-    left_join(xref %>% select(SSCQid, datazone, cluster), by = "SSCQid") %>%
-    left_join(geo, by = "datazone") %>%
+    left_join(xref %>% select(SSCQid, datazone, cluster, dz11), by = "SSCQid") %>%
+    left_join(geo, by = "dz11") %>%
     filter(!!sym(weight_var) > 0)
     
   return(df)

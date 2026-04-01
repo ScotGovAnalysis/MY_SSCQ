@@ -12,10 +12,13 @@ years <- c(20XX, 20XX, ...)
 sscq_data <- list(
   sscq_20XX = read_sas(file.path(sasdata, "FILENAME.sas7bdat")),
   sscq_20XX = read_sas(file.path(sasdata, "FILENAME.sas7bdat")),
+  ...,
   xref_20XX = read_sas(file.path(sasdata, "FILENAME.sas7bdat")),
   xref_20XX = read_sas(file.path(sasdata, "FILENAME.sas7bdat")),
-  geo_dz11  = read_csv(file.path(datashare, "FILENAME.csv"), show_col_types = FALSE) %>% rename(datazone = DZ11),
-  geo_dzold = read_csv(file.path(datashare, "FILENAME.csv"), show_col_types = FALSE)
+  ...,
+  geo_20XX   = read_csv(file.path(datashare, "FILENAME.csv"), show_col_types = FALSE) %>% rename(dz11 = DZ11),
+  geo_20XX  = read_csv(file.path(datashare, "FILENAME.csv"), show_col_types = FALSE),
+  ...
 )
 
 # ---- Load SAPE age base files when needed ----
