@@ -154,7 +154,7 @@ final_weights <- simplex_wt %>%
 message("Export weights")
 
 write.csv(final_weights, 
-          paste0(here('output'), "/SSCQ_", year_suffix, "wts.csv"), 
+          paste0(here('output'), "/sscq_", year_suffix, "wts.csv"), 
           row.names = FALSE)
 
 
