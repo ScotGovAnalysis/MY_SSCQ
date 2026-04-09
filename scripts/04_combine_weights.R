@@ -73,7 +73,7 @@ simple_summary <- simplex_wt %>%
 #
 # mapply(`==`, ...) compares the 1st, 3rd, 5th elements (Ns)
 # with the 2nd, 4th, 6th (sums). If they all match, continue.
-checks <- mapply(`==`,
+checks <- mapply(function(a, b) isTRUE(all.equal(a, b)),
                  simple_summary[c(1,3,5)],
                  simple_summary[c(2,4,6)])
 
